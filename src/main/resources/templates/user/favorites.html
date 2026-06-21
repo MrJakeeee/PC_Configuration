@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Избранное')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav}"></nav>
+<main class="container page-stack">
+    <nav class="account-tabs">
+        <a th:href="@{/profile}">Профиль</a>
+        <a th:href="@{/cart}">Корзина</a>
+        <a class="active" th:href="@{/favorites}">Избранное</a>
+        <a th:href="@{/builds}">Сборки</a>
+        <a th:href="@{/orders}">Заказы</a>
+    </nav>
+
+    <section class="page-title">
+        <div>
+            <h1>Избранное</h1>
+            <p class="muted">Сохранённые комплектующие и готовые ПК. Выберите позиции и добавьте их в корзину.</p>
+        </div>
+        <a class="button secondary" th:href="@{/catalog}">К комплектующим</a>
+    </section>
+
+    <form class="selection-panel" th:if="${!#lists.isEmpty(favorites)}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <div class="cart-list">
+            <label class="select-row" th:each="item : ${favorites}">
+                <input type="checkbox" name="selectedIds" th:value="${item.id}" checked>
+                <span>
+                    <strong th:text="${item.name}">Товар</strong>
+                    <small th:text="${item.typeLabel}">Тип</small>
+                </span>
+                <b th:text="${item.price + ' сом'}">0 сом</b>
+            </label>
+        </div>
+        <div class="summary-box light-summary">
+            <p class="summary-muted">Всего в избранном</p>
+            <p class="summary-price" th:text="${total + ' сом'}">0 сом</p>
+            <div class="actions">
+                <button type="submit" th:formaction="@{/favorites/add-to-cart}">Добавить выбранные в корзину</button>
+                <button type="submit" class="secondary" th:formaction="@{/favorites/delete}">Удалить выбранные</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="empty-state" th:if="${#lists.isEmpty(favorites)}">
+        В избранном пока пусто. Добавьте товары из каталога или готовых ПК.
+    </div>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

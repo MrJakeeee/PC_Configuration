@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Заказы')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav}"></nav>
+<main class="container">
+    <h1>История заказов и платежи</h1>
+    <table>
+        <thead>
+        <tr><th>ID</th><th>Клиент</th><th>Товар</th><th>Сумма</th><th>Статусы</th><th>Адрес</th><th>Сохранить</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="order : ${orders}">
+            <td th:text="${order.id}"></td>
+            <td th:text="${order.user.fullName}"></td>
+            <td>
+                <span th:if="${order.build != null}" th:text="${order.build.name}"></span>
+                <span th:if="${order.readyPc != null}" th:text="${order.readyPc.name}"></span>
+                <span class="order-summary" th:if="${order.itemSummary != null}" th:text="${order.itemSummary}"></span>
+            </td>
+            <td th:text="${order.amount + ' сом'}"></td>
+            <td>
+                <form th:action="@{/admin/orders}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <input type="hidden" name="id" th:value="${order.id}">
+                    <select name="status">
+                        <option th:each="status : ${statuses}" th:value="${status}" th:selected="${status == order.status}" th:text="${status.label}"></option>
+                    </select>
+                    <select name="paymentStatus">
+                        <option th:each="payment : ${paymentStatuses}" th:value="${payment}" th:selected="${payment == order.paymentStatus}" th:text="${payment.label}"></option>
+                    </select>
+                    <button type="submit">OK</button>
+                </form>
+            </td>
+            <td th:text="${order.deliveryAddress}"></td>
+            <td class="muted" th:text="${order.createdAt}"></td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>

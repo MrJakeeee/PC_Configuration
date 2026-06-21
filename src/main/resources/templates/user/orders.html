@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Мои заказы')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav}"></nav>
+<main class="container page-stack">
+    <nav class="account-tabs">
+        <a th:href="@{/profile}">Профиль</a>
+        <a th:href="@{/cart}">Корзина</a>
+        <a th:href="@{/favorites}">Избранное</a>
+        <a th:href="@{/builds}">Сборки</a>
+        <a class="active" th:href="@{/orders}">Заказы</a>
+    </nav>
+
+    <section class="page-title">
+        <div>
+            <h1>Мои заказы</h1>
+            <p class="muted">Статусы оплаты, доставки и история оформленных заказов.</p>
+        </div>
+    </section>
+    <table>
+        <thead>
+        <tr><th>ID</th><th>Товар</th><th>Сумма</th><th>Оплата</th><th>Статус</th><th>Доставка</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="order : ${orders}">
+            <td th:text="${order.id}"></td>
+            <td>
+                <span th:if="${order.build != null}" th:text="${order.build.name}"></span>
+                <span th:if="${order.readyPc != null}" th:text="${order.readyPc.name}"></span>
+                <span class="order-summary" th:if="${order.itemSummary != null}" th:text="${order.itemSummary}"></span>
+            </td>
+            <td th:text="${order.amount + ' сом'}"></td>
+            <td th:text="${order.paymentStatus.label}"></td>
+            <td th:text="${order.status.label}"></td>
+            <td>
+                <span th:if="${order.customerFirstName != null}" th:text="${order.customerFirstName + ' ' + order.customerLastName}"></span><br th:if="${order.customerFirstName != null}">
+                <span class="muted" th:if="${order.customerPhone != null}" th:text="${order.customerPhone}"></span><br th:if="${order.customerPhone != null}">
+                <span class="muted" th:if="${order.cardLast4 != null}" th:text="${'Карта •••• ' + order.cardLast4}"></span><br th:if="${order.cardLast4 != null}">
+                <span th:text="${order.deliveryAddress}"></span><br>
+                <span class="muted" th:if="${order.deliveryDueDate != null}" th:text="'Срок: ' + ${order.deliveryDueDate}"></span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

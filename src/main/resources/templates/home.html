@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Главная')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav}"></nav>
+<main class="container">
+    <section class="hero">
+        <div>
+            <h1>Конфигуратор ПК</h1>
+            <p class="muted">Соберите совместимую конфигурацию, сохраните её, добавьте в избранное и оформите заказ с доставкой.</p>
+            <div class="actions">
+                <a class="button" th:href="@{/configurator}" sec:authorize="isAuthenticated()">Открыть конфигуратор</a>
+                <a class="button" th:href="@{/login}" sec:authorize="isAnonymous()">Войти и собрать ПК</a>
+                <a class="button secondary" th:href="@{/ready-pcs}">Готовые ПК</a>
+            </div>
+        </div>
+        <div class="stats">
+            <div class="stat"><strong th:text="${categoriesCount}">0</strong><span>категорий</span></div>
+            <div class="stat"><strong th:text="${componentsCount}">0</strong><span>комплектующих</span></div>
+            <div class="stat"><strong th:text="${readyPcsCount}">0</strong><span>готовых ПК</span></div>
+        </div>
+    </section>
+
+    <h2 style="margin-top:24px">Акции</h2>
+    <div class="grid">
+        <article class="card" th:each="promotion : ${promotions}">
+            <h3 th:text="${promotion.title}">Акция</h3>
+            <p><strong th:text="${promotion.discountPercent + '%'}">10%</strong></p>
+            <p class="muted" th:text="${promotion.description}">Описание</p>
+            <p class="muted" th:if="${promotion.activeUntil != null}" th:text="'Действует до ' + ${promotion.activeUntil}"></p>
+        </article>
+        <p class="muted" th:if="${#lists.isEmpty(promotions)}">Акций пока нет.</p>
+    </div>
+</main>
+</body>
+</html>

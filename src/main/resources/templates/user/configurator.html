@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Конфигуратор')}"></head>
+<body class="configurator-page">
+<nav th:replace="~{fragments :: nav}"></nav>
+<main class="configurator-shell">
+    <section class="configurator-main">
+        <header class="configurator-heading">
+            <div>
+                <h1>Системный блок</h1>
+                <p>* Обязательные комплектующие: корпус, материнская плата, процессор, оперативная память, блок питания</p>
+            </div>
+            <a class="ready-link" th:href="@{/ready-pcs}">Готовые ПК</a>
+        </header>
+
+        <form th:action="@{/builds}" method="post" id="build-form">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <label class="build-name">
+                <span>Название ПК</span>
+                <input name="name" th:value="${buildName ?: 'Мой ПК'}">
+            </label>
+
+            <div class="config-alert" th:if="${error}">
+                <strong>Сборку нельзя сохранить</strong>
+                <span th:text="${error}"></span>
+            </div>
+
+            <div class="config-alert success" th:if="${checkPerformed != null and validation != null and validation.valid}">
+                <strong>ПК совместим</strong>
+                <span>Ошибок совместимости не найдено.</span>
+                <ul th:if="${!#lists.isEmpty(validation.warnings)}">
+                    <li th:each="warning : ${validation.warnings}" th:text="${warning}"></li>
+                </ul>
+            </div>
+
+            <div class="config-alert" th:if="${checkPerformed != null and validation != null and !validation.valid}">
+                <strong>ПК несовместим</strong>
+                <ul>
+                    <li th:each="errorItem : ${validation.errors}" th:text="${errorItem}"></li>
+                </ul>
+                <ul th:if="${!#lists.isEmpty(validation.warnings)}">
+                    <li th:each="warning : ${validation.warnings}" th:text="${warning}"></li>
+                </ul>
+            </div>
+
+            <section class="config-list">
+                <details class="config-row"
+                         th:each="group, stat : ${groups}"
+                         th:classappend="${stat.index == 0} ? ' active-row' : ''">
+                    <summary>
+                        <span class="category-title">
+                            <span th:text="${group.title()}">Категория</span>
+                            <span class="required-mark" th:if="${group.required()}">*</span>
+                        </span>
+                        <span class="category-count" th:text="${group.count()} + ' товаров'">0 товаров</span>
+                        <span class="selected-name">Не выбрано</span>
+                        <span class="add-action">Добавить <b>+</b></span>
+                    </summary>
+
+                    <div class="component-picker">
+                        <p class="empty-state" th:if="${#lists.isEmpty(group.items())}">Нет комплектующих в этой категории.</p>
+                        <label class="component-card"
+                               th:each="item : ${group.items()}"
+                               th:attr="data-price=${item.price},
+                                        data-name=${item.name},
+                                        data-part=${group.partType()},
+                                        data-single=${group.singleChoice()},
+                                        data-wattage=${item.wattage ?: 0},
+                                        data-socket=${item.socketType ?: ''},
+                                        data-memory=${item.memoryType ?: ''},
+                                        data-form-factor=${item.formFactor ?: ''},
+                                        data-storage=${item.storageInterface ?: ''}">
+                            <input type="checkbox"
+                                   name="componentIds"
+                                   th:value="${item.id}"
+                                   th:checked="${selectedIds != null and #lists.contains(selectedIds, item.id)}">
+                            <span>
+                                <strong th:text="${item.name}">Компонент</strong>
+                                <small th:text="${item.brand ?: 'Без бренда'}">Бренд</small>
+                                <em th:text="${item.price + ' сом'}">0 сом</em>
+                                <small th:text="${item.specs}">Характеристики</small>
+                                <small class="meta"
+                                       th:text="'Сокет: ' + (${item.socketType != null ? item.socketType : '-'}) +
+                                                ' · Память: ' + (${item.memoryType != null ? item.memoryType : '-'}) +
+                                                ' · Форм-фактор: ' + (${item.formFactor != null ? item.formFactor : '-'}) +
+                                                ' · Интерфейс: ' + (${item.storageInterface != null ? item.storageInterface : '-'}) +
+                                                ' · ' + (${item.wattage != null ? item.wattage : 0}) + 'W'">
+                                </small>
+                            </span>
+                        </label>
+                    </div>
+                </details>
+            </section>
+
+            <div class="build-actions">
+                <button class="button secondary" type="submit" th:formaction="@{/builds/check}">Проверить совместимость</button>
+                <button class="save-build" type="submit">Сохранить сборку</button>
+            </div>
+        </form>
+    </section>
+
+    <aside class="configurator-side">
+        <section class="summary-box">
+            <h2>Итог сборки</h2>
+            <p class="summary-price"><span id="total-price">0</span> сом</p>
+            <p class="summary-muted">Потребление: <span id="total-wattage">0</span>W + запас 100W</p>
+            <div id="client-check" class="client-check neutral">Выберите комплектующие для проверки.</div>
+            <ul id="selected-list" class="selected-list"></ul>
+        </section>
+
+        <section class="summary-box">
+            <h2>Готовые ПК</h2>
+            <p class="summary-muted">Если не хочется собирать вручную, можно выбрать готовый вариант.</p>
+            <article class="ready-mini" th:each="pc : ${readyPcs}">
+                <strong th:text="${pc.name}">ПК</strong>
+                <span th:text="${pc.purpose}">Назначение</span>
+                <b th:text="${pc.price + ' сом'}">0 сом</b>
+                <p th:text="${pc.description}">Описание</p>
+            </article>
+            <a class="ready-button" th:href="@{/ready-pcs}">Открыть каталог готовых ПК</a>
+        </section>
+    </aside>
+</main>
+
+<script>
+    const cards = [...document.querySelectorAll(".component-card")];
+    const requiredParts = ["CASE", "MOTHERBOARD", "CPU", "RAM", "PSU"];
+
+    function updateConfigurator() {
+        let total = 0;
+        let wattage = 0;
+        const selected = cards.filter(card => card.querySelector("input").checked);
+        const list = document.getElementById("selected-list");
+        list.innerHTML = "";
+
+        document.querySelectorAll(".config-row").forEach(row => {
+            const checked = row.querySelector(".component-card input:checked");
+            row.querySelector(".selected-name").textContent = checked ? checked.closest(".component-card").dataset.name : "Не выбрано";
+        });
+
+        selected.forEach(card => {
+            total += Number(card.dataset.price || 0);
+            if (card.dataset.part !== "PSU") {
+                wattage += Number(card.dataset.wattage || 0);
+            }
+            const li = document.createElement("li");
+            li.textContent = card.dataset.name + " - " + Number(card.dataset.price || 0).toLocaleString("ru-RU") + " сом";
+            list.appendChild(li);
+        });
+
+        document.getElementById("total-price").textContent = total.toLocaleString("ru-RU");
+        document.getElementById("total-wattage").textContent = wattage;
+        runClientCheck(selected, wattage);
+    }
+
+    function byPart(selected, part) {
+        return selected.find(card => card.dataset.part === part);
+    }
+
+    function allByPart(selected, part) {
+        return selected.filter(card => card.dataset.part === part);
+    }
+
+    function runClientCheck(selected, wattage) {
+        const box = document.getElementById("client-check");
+        const errors = [];
+        const warnings = [];
+
+        requiredParts.forEach(part => {
+            if (!byPart(selected, part)) errors.push(requiredLabel(part) + " не выбран");
+        });
+
+        const cpu = byPart(selected, "CPU");
+        const board = byPart(selected, "MOTHERBOARD");
+        const ram = byPart(selected, "RAM");
+        const caseItem = byPart(selected, "CASE");
+        const psu = byPart(selected, "PSU");
+        const gpu = byPart(selected, "GPU");
+        const storages = [...allByPart(selected, "M2"), ...allByPart(selected, "SATA")];
+
+        if (cpu && board && cpu.dataset.socket && board.dataset.socket && cpu.dataset.socket !== board.dataset.socket) {
+            errors.push("Сокет процессора и платы не совпадает");
+        }
+        if (ram && board && ram.dataset.memory && board.dataset.memory && ram.dataset.memory !== board.dataset.memory) {
+            errors.push("Тип памяти не подходит к плате");
+        }
+        if (caseItem && board && !caseSupports(caseItem.dataset.formFactor, board.dataset.formFactor)) {
+            errors.push("Корпус не поддерживает форм-фактор платы");
+        }
+        storages.forEach(storage => {
+            if (board && storage.dataset.storage && board.dataset.storage && !board.dataset.storage.toLowerCase().includes(storage.dataset.storage.toLowerCase())) {
+                errors.push("Плата не поддерживает " + storage.dataset.storage + " накопитель");
+            }
+        });
+        if (psu && Number(psu.dataset.wattage || 0) < wattage + 100) {
+            errors.push("Блок питания слабый для этой сборки");
+        }
+        if (!gpu) warnings.push("Видеокарта не выбрана");
+
+        if (errors.length) {
+            box.className = "client-check bad";
+            box.innerHTML = errors.join("<br>");
+        } else if (warnings.length) {
+            box.className = "client-check warn";
+            box.innerHTML = "Сборку можно сохранить, но есть замечания:<br>" + warnings.join("<br>");
+        } else {
+            box.className = "client-check good";
+            box.textContent = "Сборка выглядит совместимой.";
+        }
+    }
+
+    function requiredLabel(part) {
+        return {CASE:"Корпус",MOTHERBOARD:"Материнская плата",CPU:"Процессор",RAM:"Оперативная память",PSU:"Блок питания"}[part] || part;
+    }
+
+    function caseSupports(box, board) {
+        const b = (box || "").toUpperCase().replace(/\s/g, "");
+        const m = (board || "").toUpperCase().replace(/\s/g, "");
+        if (!b || !m) return true;
+        if (b === "ATX") return true;
+        if (b === "MATX" || b === "M-ATX") return m === "MATX" || m === "M-ATX" || m === "MINI-ITX";
+        if (b === "MINI-ITX") return m === "MINI-ITX";
+        return b.includes(m);
+    }
+
+    cards.forEach(card => {
+        card.querySelector("input").addEventListener("change", event => {
+            if (event.target.checked && card.dataset.single === "true") {
+                cards.forEach(other => {
+                    if (other !== card && other.dataset.part === card.dataset.part) {
+                        other.querySelector("input").checked = false;
+                    }
+                });
+            }
+            updateConfigurator();
+        });
+    });
+
+    updateConfigurator();
+</script>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

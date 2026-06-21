@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Ошибка')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav}"></nav>
+<main class="container">
+    <section class="panel error-panel">
+        <h1>Не удалось выполнить действие</h1>
+        <p class="muted" th:text="${message ?: 'Проверьте введённые данные или попробуйте ещё раз.'}">Проверьте введённые данные.</p>
+        <div class="actions">
+            <a class="button" th:href="@{/configurator}">В конфигуратор</a>
+            <a class="button secondary" th:href="@{/ready-pcs}">Готовые ПК</a>
+        </div>
+    </section>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Оформление заказа')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav}"></nav>
+<main class="container page-stack">
+    <section class="page-title">
+        <div>
+            <h1>Оформление заказа</h1>
+            <p class="muted">Готовый ПК можно заказать сразу, без ручной сборки.</p>
+        </div>
+        <a class="button secondary" th:href="@{/ready-pcs}">Назад к готовым ПК</a>
+    </section>
+
+    <section class="panel checkout-layout">
+        <div>
+            <span class="badge" th:text="${pc.purpose}">Готовый ПК</span>
+            <h2 th:text="${pc.name}">Готовый ПК</h2>
+            <p class="muted" th:text="${pc.description}">Описание</p>
+            <p class="price"><strong th:text="${amount + ' сом'}">0 сом</strong></p>
+        </div>
+        <form class="order-form" th:action="@{/orders/ready-pc}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input type="hidden" name="readyPcId" th:value="${pc.id}">
+            <label>Имя
+                <input name="firstName" th:value="${firstName}" th:classappend="${fieldErrors != null and fieldErrors.containsKey('firstName')} ? ' field-invalid'" required>
+                <span class="field-error" th:if="${fieldErrors != null and fieldErrors.containsKey('firstName')}" th:text="${fieldErrors.get('firstName')}"></span>
+            </label>
+            <label>Фамилия
+                <input name="lastName" th:value="${lastName}" th:classappend="${fieldErrors != null and fieldErrors.containsKey('lastName')} ? ' field-invalid'" required>
+                <span class="field-error" th:if="${fieldErrors != null and fieldErrors.containsKey('lastName')}" th:text="${fieldErrors.get('lastName')}"></span>
+            </label>
+            <label>Телефон
+                <input name="phone" th:value="${checkoutPhone ?: user.phone}" placeholder="+996 ..." th:classappend="${fieldErrors != null and fieldErrors.containsKey('phone')} ? ' field-invalid'" required>
+                <span class="field-error" th:if="${fieldErrors != null and fieldErrors.containsKey('phone')}" th:text="${fieldErrors.get('phone')}"></span>
+            </label>
+            <label>Адрес доставки
+                <input name="address" th:value="${checkoutAddress ?: user.address}" placeholder="Город, улица, дом" th:classappend="${fieldErrors != null and fieldErrors.containsKey('address')} ? ' field-invalid'" required>
+                <span class="field-error" th:if="${fieldErrors != null and fieldErrors.containsKey('address')}" th:text="${fieldErrors.get('address')}"></span>
+            </label>
+            <label>Номер карты
+                <input name="cardNumber" th:value="${cardNumber}" inputmode="numeric" autocomplete="cc-number" placeholder="0000 0000 0000 0000" maxlength="19" pattern="(?:\d{4} ){3}\d{4}|\d{16}" data-card-number th:classappend="${fieldErrors != null and fieldErrors.containsKey('cardNumber')} ? ' field-invalid'" required>
+                <span class="field-error" th:if="${fieldErrors != null and fieldErrors.containsKey('cardNumber')}" th:text="${fieldErrors.get('cardNumber')}"></span>
+            </label>
+            <label>Срок карты
+                <input name="cardExpiry" th:value="${cardExpiry}" inputmode="numeric" autocomplete="cc-exp" placeholder="ММ/ГГ" maxlength="5" pattern="\d{2}/\d{2}" data-card-expiry th:classappend="${fieldErrors != null and fieldErrors.containsKey('cardExpiry')} ? ' field-invalid'" required>
+                <span class="field-error" th:if="${fieldErrors != null and fieldErrors.containsKey('cardExpiry')}" th:text="${fieldErrors.get('cardExpiry')}"></span>
+            </label>
+            <label>CVV
+                <input name="cardCvv" inputmode="numeric" autocomplete="cc-csc" placeholder="123" maxlength="4" pattern="\d{3,4}" data-card-cvv th:classappend="${fieldErrors != null and fieldErrors.containsKey('cardCvv')} ? ' field-invalid'" required>
+                <span class="field-error" th:if="${fieldErrors != null and fieldErrors.containsKey('cardCvv')}" th:text="${fieldErrors.get('cardCvv')}"></span>
+            </label>
+            <label>Комментарий <textarea name="comment" th:text="${comment}" placeholder="Удобное время, детали доставки"></textarea></label>
+            <button type="submit">Подтвердить заказ</button>
+        </form>
+    </section>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+<script th:src="@{/js/payment-fields.js}"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Акции')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav}"></nav>
+<main class="container">
+    <h1>Акции и скидки</h1>
+    <form class="panel" th:action="@{/admin/promotions}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <div class="grid">
+            <label>Название <input name="title" required></label>
+            <label>Скидка, % <input name="discountPercent" type="number" min="0" max="90" required></label>
+            <label>Активна до <input name="activeUntil" type="date"></label>
+            <label>Активна
+                <select name="active">
+                    <option value="true">Да</option>
+                    <option value="false">Нет</option>
+                </select>
+            </label>
+        </div>
+        <label>Описание <textarea name="description"></textarea></label>
+        <button type="submit">Сохранить акцию</button>
+    </form>
+    <table style="margin-top:18px">
+        <thead><tr><th>ID</th><th>Название</th><th>Скидка</th><th>До</th><th>Активна</th></tr></thead>
+        <tbody>
+        <tr th:each="promotion : ${promotions}">
+            <td th:text="${promotion.id}"></td>
+            <td th:text="${promotion.title}"></td>
+            <td th:text="${promotion.discountPercent + '%'}"></td>
+            <td th:text="${promotion.activeUntil}"></td>
+            <td th:text="${promotion.active ? 'Да' : 'Нет'}"></td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>

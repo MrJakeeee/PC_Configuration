@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Панель доставщика')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav}"></nav>
+<main class="container">
+    <h1>Панель доставщика</h1>
+    <section class="notice">
+        Готовых к доставке заказов: <strong th:text="${readyOrders.size()}">0</strong>
+    </section>
+    <table style="margin-top:18px">
+        <thead>
+        <tr><th>ID</th><th>Клиент</th><th>Адрес</th><th>Статус и срок</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="order : ${orders}">
+            <td th:text="${order.id}"></td>
+            <td>
+                <span th:text="${order.user.fullName}"></span><br>
+                <span class="muted" th:text="${order.user.phone}"></span>
+            </td>
+            <td th:text="${order.deliveryAddress}"></td>
+            <td>
+                <form th:action="@{/deliverer/orders}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <input type="hidden" name="id" th:value="${order.id}">
+                    <select name="status">
+                        <option th:each="status : ${statuses}" th:value="${status}" th:selected="${status == order.status}" th:text="${status.label}"></option>
+                    </select>
+                    <input name="deliveryDueDate" type="date" th:value="${order.deliveryDueDate}">
+                    <input name="comment" th:value="${order.deliveryComment}" placeholder="Комментарий">
+                    <button type="submit">Обновить</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>

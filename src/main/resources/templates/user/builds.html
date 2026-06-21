@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Мои сборки')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav}"></nav>
+<main class="container page-stack">
+    <nav class="account-tabs">
+        <a th:href="@{/profile}">Профиль</a>
+        <a th:href="@{/cart}">Корзина</a>
+        <a th:href="@{/favorites}">Избранное</a>
+        <a class="active" th:href="@{/builds}">Сборки</a>
+        <a th:href="@{/orders}">Заказы</a>
+    </nav>
+
+    <section class="page-title">
+        <div>
+            <h1>Сохранённые сборки</h1>
+            <p class="muted">Выберите нужную сборку по названию ПК и переходите к оформлению заказа.</p>
+        </div>
+        <a class="button" th:href="@{/configurator}">Новая сборка</a>
+    </section>
+
+    <div class="grid product-grid">
+        <article class="card product-card" th:each="build : ${builds}">
+            <h3 th:text="${build.name}">Название ПК</h3>
+            <p class="price"><strong th:text="${build.totalPrice + ' сом'}">0 сом</strong></p>
+            <ul class="compact-list">
+                <li th:each="component : ${build.components}" th:text="${component.category.name + ': ' + component.name}"></li>
+            </ul>
+            <div class="actions">
+                <a class="button" th:href="@{/checkout/build/{id}(id=${build.id})}">Оформить заказ</a>
+                <form th:action="@{/favorites}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <input type="hidden" name="buildId" th:value="${build.id}">
+                    <button type="submit"
+                            class="secondary"
+                            th:disabled="${favoriteBuildIds.contains(build.id)}"
+                            th:text="${favoriteBuildIds.contains(build.id) ? 'В избранных' : 'В избранное'}">В избранное</button>
+                </form>
+                <form th:action="@{/builds/delete}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <input type="hidden" name="buildId" th:value="${build.id}">
+                    <button type="submit" class="danger">Удалить</button>
+                </form>
+            </div>
+        </article>
+    </div>
+    <p class="empty-state" th:if="${#lists.isEmpty(builds)}">Сборок пока нет. Откройте конфигуратор и сохраните первую конфигурацию.</p>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

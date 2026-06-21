@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Админ-панель')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav}"></nav>
+<main class="container">
+    <h1>Административная панель</h1>
+    <div class="grid">
+        <a class="card" th:href="@{/admin/categories}"><h3>Категории</h3><p class="muted">Создание и редактирование категорий.</p></a>
+        <a class="card" th:href="@{/admin/components}"><h3>Товары</h3><p class="muted">Комплектующие: цена, наличие, характеристики.</p></a>
+        <a class="card" th:href="@{/admin/ready-pcs}"><h3>Готовые ПК</h3><p class="muted">Каталог готовых сборок.</p></a>
+        <a class="card" th:href="@{/admin/promotions}"><h3>Акции</h3><p class="muted">Скидки и сроки действия.</p></a>
+        <a class="card" th:href="@{/admin/orders}"><h3>Заказы и платежи</h3><p class="muted">История заказов, статусы оплаты.</p></a>
+    </div>
+    <section class="panel" style="margin-top:20px">
+        <h2>Сводка</h2>
+        <p>Комплектующих: <strong th:text="${componentsCount}">0</strong></p>
+        <p>Готовых ПК: <strong th:text="${readyPcsCount}">0</strong></p>
+        <p>Заказов: <strong th:text="${orders.size()}">0</strong></p>
+    </section>
+</main>
+</body>
+</html>
